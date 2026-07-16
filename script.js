@@ -1,83 +1,112 @@
-const KEY = "um-sonho-real-data";
+const STORAGE_KEY = "um-sonho-real-v3";
 
 let data = JSON.parse(
-  localStorage.getItem(KEY) ||
-  '{"characters":[],"families":[],"timeline":[],"chapters":[],"places":[],"ideas":[],"playlist":[]}'
-);
+  localStorage.getItem(STORAGE_KEY)
+) || {
+  characters: [],
+  timelines: [],
+  chapters: [],
+  places: [],
+  ideas: [],
+  playlist: []
+};
 
 const $ = (selector) => document.querySelector(selector);
 
 const $$ = (selector) => document.querySelectorAll(selector);
 
 function save() {
-  localStorage.setItem(KEY, JSON.stringify(data));
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(data)
+  );
+
   renderAll();
 }
 
 function escapeHTML(value = "") {
-  return String(value).replace(/[&<>"']/g, function (m) {
-    return {
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#039;"
-    }[m];
-  });
+
+  return String(value).replace(
+    /[&<>"']/g,
+    function (character) {
+
+      return {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      }[character];
+
+    }
+  );
+
 }
 
-/* NAVEGAÇÃO */
-
-function nav(section) {
+function showSection(section) {
 
   $$(".section").forEach((element) => {
+
     element.classList.toggle(
       "active",
       element.id === section
     );
+
   });
 
   $$(".nav-btn").forEach((button) => {
+
     button.classList.toggle(
       "active",
       button.dataset.section === section
     );
+
   });
 
   const names = {
+
     dashboard: "Painel da Escritora",
     characters: "Personagens",
     families: "Famílias",
-    timeline: "Linha do tempo",
+    timelines: "Linhas do tempo",
     chapters: "Capítulos",
     places: "Lugares",
     ideas: "Ideias e anotações",
-    playlist: "Playlist"
+    playlist: "Playlist",
+    settings: "Personalização"
+
   };
 
-  document.querySelector(".topbar h1").textContent =
+  $("#pageTitle").textContent =
     names[section] || "Painel da Escritora";
+
 }
 
 $$(".nav-btn").forEach((button) => {
 
-  button.onclick = () => {
-    nav(button.dataset.section);
-  };
+  button.addEventListener("click", () => {
+
+    showSection(
+      button.dataset.section
+    );
+
+  });
 
 });
 
 $$("[data-go]").forEach((button) => {
 
-  button.onclick = () => {
-    nav(button.dataset.go);
-  };
+  button.addEventListener("click", () => {
+
+    showSection(
+      button.dataset.go
+    );
+
+  });
 
 });
 
-/* MODAL */
-
-function openModal(title, fields, onSave) {
+function openModal(title, fields, callback) {
 
   $("#modalTitle").textContent = title;
 
@@ -90,8 +119,12 @@ function openModal(title, fields, onSave) {
         if (field.type === "textarea") {
 
           return `
+
             <div class="field ${field.full ? "full" : ""}">
-              <label>${field.label}</label>
+
+              <label>
+                ${field.label}
+              </label>
 
               <textarea
                 name="${field.name}"
@@ -99,14 +132,49 @@ function openModal(title, fields, onSave) {
               >${escapeHTML(field.value || "")}</textarea>
 
             </div>
+
+          `;
+
+        }
+
+        if (field.type === "select") {
+
+          return `
+
+            <div class="field ${field.full ? "full" : ""}">
+
+              <label>
+                ${field.label}
+              </label>
+
+              <select name="${field.name}">
+
+                ${field.options.map((option) => `
+
+                  <option
+                    value="${escapeHTML(option)}"
+                    ${option === field.value ? "selected" : ""}
+                  >
+                    ${escapeHTML(option)}
+                  </option>
+
+                `).join("")}
+
+              </select>
+
+            </div>
+
           `;
 
         }
 
         return `
+
           <div class="field ${field.full ? "full" : ""}">
 
-            <label>${field.label}</label>
+            <label>
+              ${field.label}
+            </label>
 
             <input
               type="${field.type || "text"}"
@@ -116,6 +184,7 @@ function openModal(title, fields, onSave) {
             >
 
           </div>
+
         `;
 
       }).join("")}
@@ -130,7 +199,7 @@ function openModal(title, fields, onSave) {
 
   $("#modal").classList.remove("hidden");
 
-  $("#modalForm").onsubmit = (event) => {
+  $("#modalForm").onsubmit = function(event) {
 
     event.preventDefault();
 
@@ -138,7 +207,7 @@ function openModal(title, fields, onSave) {
       event.target
     );
 
-    onSave(
+    callback(
       Object.fromEntries(formData)
     );
 
@@ -150,11 +219,29 @@ function openModal(title, fields, onSave) {
 
 }
 
-$("#closeModal").onclick = () => {
+$("#closeModal").addEventListener(
+  "click",
+  () => {
 
-  $("#modal").classList.add("hidden");
+    $("#modal").classList.add("hidden");
 
-};
+  }
+);
+
+$("#modal").addEventListener(
+  "click",
+  (event) => {
+
+    if (
+      event.target === $("#modal")
+    ) {
+
+      $("#modal").classList.add("hidden");
+
+    }
+
+  }
+);
 
 /* PERSONAGENS */
 
@@ -199,7 +286,7 @@ function characterForm(item = {}, index = -1) {
       {
         name: "image",
         label: "Link da imagem",
-        placeholder: "Cole o link de uma imagem",
+        placeholder: "Cole o link da imagem",
         value: item.image,
         full: true
       },
@@ -248,11 +335,10 @@ function characterForm(item = {}, index = -1) {
 
 }
 
-$("#addCharacter").onclick = () => {
-
-  characterForm();
-
-};
+$("#addCharacter").addEventListener(
+  "click",
+  () => characterForm()
+);
 
 function renderCharacters() {
 
@@ -261,10 +347,14 @@ function renderCharacters() {
   if (data.characters.length === 0) {
 
     element.innerHTML = `
+
       <div class="empty">
+
         Ainda não há personagens.
         Clique em "Novo personagem".
+
       </div>
+
     `;
 
     return;
@@ -278,12 +368,16 @@ function renderCharacters() {
 
         <div class="item-image">
 
-          ${character.image
-            ? `<img
-                src="${escapeHTML(character.image)}"
-                style="width:100%;height:100%;object-fit:cover"
-              >`
-            : "♙"
+          ${
+            character.image
+
+              ? `<img
+                  src="${escapeHTML(character.image)}"
+                  style="width:100%;height:100%;object-fit:cover"
+                >`
+
+              : "👤"
+
           }
 
         </div>
@@ -346,38 +440,44 @@ function renderFamilies() {
 
   data.characters.forEach((character) => {
 
-    if (character.surname) {
+    const surname =
+      character.surname?.trim();
 
-      if (!families[character.surname]) {
+    if (!surname) return;
 
-        families[character.surname] = [];
+    if (!families[surname]) {
 
-      }
-
-      families[character.surname].push(
-        character.name
-      );
+      families[surname] = [];
 
     }
 
+    families[surname].push(
+      character.name
+    );
+
   });
 
-  const names = Object.keys(families);
+  const familyNames =
+    Object.keys(families);
 
-  if (names.length === 0) {
+  if (familyNames.length === 0) {
 
     element.innerHTML = `
+
       <div class="empty">
+
         Adicione personagens com sobrenomes
         para criar famílias automaticamente.
+
       </div>
+
     `;
 
     return;
 
   }
 
-  element.innerHTML = names.map(
+  element.innerHTML = familyNames.map(
     (family) => `
 
       <article class="card family-card">
@@ -392,7 +492,7 @@ function renderFamilies() {
             (member) => `
 
               <span class="member">
-                ♙ ${escapeHTML(member)}
+                👤 ${escapeHTML(member)}
               </span>
 
             `
@@ -407,59 +507,32 @@ function renderFamilies() {
 
 }
 
-/* LINHA DO TEMPO */
+/* LINHAS DO TEMPO */
 
-function timelineForm(item = {}, index = -1) {
+function timelineForm(item = {}, timelineIndex = -1) {
 
   openModal(
 
-    index >= 0
-      ? "Editar acontecimento"
-      : "Novo acontecimento",
+    timelineIndex >= 0
+      ? "Editar linha do tempo"
+      : "Nova linha do tempo",
 
     [
 
       {
-        name: "date",
-        label: "Data ou período",
-        placeholder: "Ex.: 2026",
-        value: item.date
-      },
-
-      {
-        name: "title",
-        label: "Título",
-        placeholder: "Ex.: Isabella chega à Inglaterra",
-        value: item.title
-      },
-
-      {
-        name: "place",
-        label: "Local",
-        placeholder: "Ex.: Inglaterra",
-        value: item.place
-      },
-
-      {
-        name: "chapter",
-        label: "Capítulo",
-        placeholder: "Ex.: Capítulo 1",
-        value: item.chapter
-      },
-
-      {
-        name: "description",
-        label: "O que acontece?",
-        type: "textarea",
-        value: item.description,
+        name: "name",
+        label: "Nome da linha do tempo",
+        placeholder: "Ex.: Vida da Isabella",
+        value: item.name,
         full: true
       },
 
       {
-        name: "characters",
-        label: "Personagens envolvidos",
-        placeholder: "Isabella, Filiphi...",
-        value: item.characters,
+        name: "description",
+        label: "Descrição",
+        type: "textarea",
+        placeholder: "Sobre o que é esta linha do tempo?",
+        value: item.description,
         full: true
       }
 
@@ -467,13 +540,26 @@ function timelineForm(item = {}, index = -1) {
 
     (value) => {
 
-      if (index >= 0) {
+      if (timelineIndex >= 0) {
 
-        data.timeline[index] = value;
+        data.timelines[timelineIndex] = {
+          ...data.timelines[timelineIndex],
+          ...value
+        };
 
       } else {
 
-        data.timeline.push(value);
+        data.timelines.push({
+
+          id: Date.now(),
+
+          name: value.name,
+
+          description: value.description,
+
+          events: []
+
+        });
 
       }
 
@@ -483,88 +569,921 @@ function timelineForm(item = {}, index = -1) {
 
 }
 
-$("#addTimeline").onclick = () => {
+function eventForm(
+  timelineIndex,
+  event = {},
+  eventIndex = -1
+) {
 
-  timelineForm();
+  openModal(
 
-};
+    eventIndex >= 0
+      ? "Editar acontecimento"
+      : "Novo acontecimento",
 
-function renderTimeline() {
+    [
 
-  const element = $("#timelineList");
+      {
+        name: "date",
+        label: "Data",
+        type: "date",
+        value: event.date
+      },
 
-  if (data.timeline.length === 0) {
+      {
+        name: "title",
+        label: "Título",
+        placeholder: "Ex.: Isabella nasce",
+        value: event.title
+      },
+
+      {
+        name: "place",
+        label: "Local",
+        placeholder: "Ex.: Brasil",
+        value: event.place
+      },
+
+      {
+        name: "chapter",
+        label: "Capítulo",
+        placeholder: "Ex.: Capítulo 1",
+        value: event.chapter
+      },
+
+      {
+        name: "description",
+        label: "O que acontece?",
+        type: "textarea",
+        value: event.description,
+        full: true
+      },
+
+      {
+        name: "characters",
+        label: "Personagens envolvidos",
+        placeholder: "Isabella, Filiphi...",
+        value: event.characters,
+        full: true
+      }
+
+    ],
+
+    (value) => {
+
+      const timeline =
+        data.timelines[timelineIndex];
+
+      if (!timeline.events) {
+
+        timeline.events = [];
+
+      }
+
+      if (eventIndex >= 0) {
+
+        timeline.events[eventIndex] = value;
+
+      } else {
+
+        timeline.events.push(value);
+
+      }
+
+      sortEvents(timeline);
+
+    }
+
+  );
+
+}
+
+function sortEvents(timeline) {
+
+  timeline.events.sort(
+    (a, b) => {
+
+      const dateA =
+        new Date(a.date || "9999-12-31");
+
+      const dateB =
+        new Date(b.date || "9999-12-31");
+
+      return dateA - dateB;
+
+    }
+  );
+
+}
+
+function renderTimelines() {
+
+  const element =
+    $("#timelinesGrid");
+
+  if (data.timelines.length === 0) {
 
     element.innerHTML = `
+
       <div class="empty">
-        Sua linha do tempo está esperando
-        o primeiro acontecimento.
+
+        Você ainda não criou nenhuma
+        linha do tempo.
+
       </div>
+
     `;
 
     return;
 
   }
 
-  element.innerHTML = data.timeline.map(
-    (event, index) => `
+  element.innerHTML =
+    data.timelines.map(
+      (timeline, timelineIndex) => {
 
-      <article class="timeline-item">
+        const events =
+          timeline.events || [];
 
-        <div class="timeline-date">
-          ${escapeHTML(event.date || "Sem data")}
-        </div>
+        sortEvents(timeline);
 
-        <h3>
-          ${escapeHTML(event.title || "Sem título")}
-        </h3>
+        return `
 
-        <p>
-          ${escapeHTML(event.description || "")}
-        </p>
+          <article class="timeline-group">
 
-        <span class="tag">
-          📍 ${escapeHTML(event.place || "Local não definido")}
-        </span>
+            <div class="timeline-group-header">
 
-        <span class="tag">
-          📖 ${escapeHTML(event.chapter || "Sem capítulo")}
-        </span>
+              <div>
 
-        <div class="actions">
+                <h3>
+                  ${escapeHTML(
+                    timeline.name ||
+                    "Linha do tempo sem nome"
+                  )}
+                </h3>
 
-          <button
-            class="action-btn"
-            onclick="timelineForm(data.timeline[${index}], ${index})"
-          >
-            Editar
-          </button>
+                <p>
+                  ${escapeHTML(
+                    timeline.description || ""
+                  )}
+                </p>
 
-          <button
-            class="action-btn delete"
-            onclick="removeItem('timeline', ${index})"
-          >
-            Excluir
-          </button>
+              </div>
 
-        </div>
+              <div class="actions">
 
-      </article>
+                <button
+                  class="action-btn"
+                  onclick="eventForm(${timelineIndex})"
+                >
+                  ＋ Acontecimento
+                </button>
 
-    `
-  ).join("");
+                <button
+                  class="action-btn"
+                  onclick="timelineForm(data.timelines[${timelineIndex}], ${timelineIndex})"
+                >
+                  Editar
+                </button>
+
+                <button
+                  class="action-btn delete"
+                  onclick="removeItem('timelines', ${timelineIndex})"
+                >
+                  Excluir
+                </button>
+
+              </div>
+
+            </div>
+
+            ${
+              events.length === 0
+
+                ? `
+
+                  <div class="empty">
+                    Esta linha do tempo ainda está vazia.
+                  </div>
+
+                  `
+
+                : `
+
+                  <div class="timeline">
+
+                    ${events.map(
+                      (event, eventIndex) => `
+
+                        <div class="timeline-item">
+
+                          <div class="timeline-date">
+
+                            ${
+                              event.date
+                                ? new Date(
+                                    event.date +
+                                    "T00:00:00"
+                                  ).toLocaleDateString(
+                                    "pt-BR"
+                                  )
+                                : "Sem data"
+                            }
+
+                          </div>
+
+                          <h4>
+                            ${escapeHTML(
+                              event.title ||
+                              "Sem título"
+                            )}
+                          </h4>
+
+                          <p>
+                            ${escapeHTML(
+                              event.description ||
+                              ""
+                            )}
+                          </p>
+
+                          ${
+                            event.place
+                              ? `<span class="tag">
+                                  📍 ${escapeHTML(event.place)}
+                                </span>`
+                              : ""
+                          }
+
+                          ${
+                            event.chapter
+                              ? `<span class="tag">
+                                  📖 ${escapeHTML(event.chapter)}
+                                </span>`
+                              : ""
+                          }
+
+                          ${
+                            event.characters
+                              ? `<span class="tag">
+                                  👥 ${escapeHTML(event.characters)}
+                                </span>`
+                              : ""
+                          }
+
+                          <div class="actions">
+
+                            <button
+                              class="action-btn"
+                              onclick="eventForm(${timelineIndex}, data.timelines[${timelineIndex}].events[${eventIndex}], ${eventIndex})"
+                            >
+                              Editar
+                            </button>
+
+                            <button
+                              class="action-btn delete"
+                              onclick="removeEvent(${timelineIndex}, ${eventIndex})"
+                            >
+                              Excluir
+                            </button>
+
+                          </div>
+
+                        </div>
+
+                      `
+                    ).join("")}
+
+                  </div>
+
+                  `
+
+            }
+
+          </article>
+
+        `;
+
+      }
+    ).join("");
+
+}
+
+function removeEvent(
+  timelineIndex,
+  eventIndex
+) {
+
+  if (
+    confirm(
+      "Deseja excluir este acontecimento?"
+    )
+  ) {
+
+    data.timelines[
+      timelineIndex
+    ].events.splice(
+      eventIndex,
+      1
+    );
+
+    save();
+
+  }
+
+}
+
+$("#addTimeline").addEventListener(
+  "click",
+  () => timelineForm()
+);
+
+/* CAPÍTULOS */
+
+function chapterForm(
+  item = {},
+  index = -1
+) {
+
+  openModal(
+
+    index >= 0
+      ? "Editar capítulo"
+      : "Novo capítulo",
+
+    [
+
+      {
+        name: "number",
+        label: "Número",
+        type: "number",
+        value: item.number
+      },
+
+      {
+        name: "title",
+        label: "Título",
+        placeholder: "Ex.: O começo",
+        value: item.title
+      },
+
+      {
+        name: "status",
+        label: "Status",
+        type: "select",
+        options: [
+          "Planejado",
+          "Em andamento",
+          "Concluído"
+        ],
+        value: item.status || "Planejado"
+      },
+
+      {
+        name: "summary",
+        label: "Resumo",
+        type: "textarea",
+        value: item.summary,
+        full: true
+      }
+
+    ],
+
+    (value) => {
+
+      if (index >= 0) {
+
+        data.chapters[index] = value;
+
+      } else {
+
+        data.chapters.push(value);
+
+      }
+
+    }
+
+  );
+
+}
+
+$("#addChapter").addEventListener(
+  "click",
+  () => chapterForm()
+);
+
+function renderChapters() {
+
+  const element =
+    $("#chaptersGrid");
+
+  if (data.chapters.length === 0) {
+
+    element.innerHTML = `
+
+      <div class="empty">
+        Nenhum capítulo adicionado.
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+  element.innerHTML =
+    data.chapters.map(
+      (chapter, index) => `
+
+        <article class="card">
+
+          <span class="tag">
+            Capítulo ${escapeHTML(
+              chapter.number || ""
+            )}
+          </span>
+
+          <h3>
+            ${escapeHTML(
+              chapter.title ||
+              "Sem título"
+            )}
+          </h3>
+
+          <p>
+            ${escapeHTML(
+              chapter.summary ||
+              "Sem resumo."
+            )}
+          </p>
+
+          <span class="tag">
+            ${escapeHTML(
+              chapter.status ||
+              "Planejado"
+            )}
+          </span>
+
+          <div class="actions">
+
+            <button
+              class="action-btn"
+              onclick="chapterForm(data.chapters[${index}], ${index})"
+            >
+              Editar
+            </button>
+
+            <button
+              class="action-btn delete"
+              onclick="removeItem('chapters', ${index})"
+            >
+              Excluir
+            </button>
+
+          </div>
+
+        </article>
+
+      `
+    ).join("");
+
+}
+
+/* LUGARES */
+
+function placeForm(
+  item = {},
+  index = -1
+) {
+
+  openModal(
+
+    index >= 0
+      ? "Editar lugar"
+      : "Novo lugar",
+
+    [
+
+      {
+        name: "name",
+        label: "Nome do lugar",
+        placeholder: "Ex.: Escola",
+        value: item.name
+      },
+
+      {
+        name: "country",
+        label: "País / região",
+        placeholder: "Ex.: Inglaterra",
+        value: item.country
+      },
+
+      {
+        name: "description",
+        label: "Descrição",
+        type: "textarea",
+        value: item.description,
+        full: true
+      }
+
+    ],
+
+    (value) => {
+
+      if (index >= 0) {
+
+        data.places[index] = value;
+
+      } else {
+
+        data.places.push(value);
+
+      }
+
+    }
+
+  );
+
+}
+
+$("#addPlace").addEventListener(
+  "click",
+  () => placeForm()
+);
+
+function renderPlaces() {
+
+  const element =
+    $("#placesGrid");
+
+  if (data.places.length === 0) {
+
+    element.innerHTML = `
+
+      <div class="empty">
+        Nenhum lugar adicionado.
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+  element.innerHTML =
+    data.places.map(
+      (place, index) => `
+
+        <article class="card">
+
+          <h3>
+            🗺️ ${escapeHTML(
+              place.name ||
+              "Sem nome"
+            )}
+          </h3>
+
+          <span class="tag">
+            ${escapeHTML(
+              place.country ||
+              "Sem região"
+            )}
+          </span>
+
+          <p>
+            ${escapeHTML(
+              place.description ||
+              "Sem descrição."
+            )}
+          </p>
+
+          <div class="actions">
+
+            <button
+              class="action-btn"
+              onclick="placeForm(data.places[${index}], ${index})"
+            >
+              Editar
+            </button>
+
+            <button
+              class="action-btn delete"
+              onclick="removeItem('places', ${index})"
+            >
+              Excluir
+            </button>
+
+          </div>
+
+        </article>
+
+      `
+    ).join("");
+
+}
+
+/* IDEIAS */
+
+function ideaForm(
+  item = {},
+  index = -1
+) {
+
+  openModal(
+
+    index >= 0
+      ? "Editar ideia"
+      : "Nova ideia",
+
+    [
+
+      {
+        name: "title",
+        label: "Título",
+        placeholder: "Ex.: Novo mistério",
+        value: item.title
+      },
+
+      {
+        name: "category",
+        label: "Categoria",
+        placeholder: "Personagem, plot, romance...",
+        value: item.category
+      },
+
+      {
+        name: "text",
+        label: "Sua ideia",
+        type: "textarea",
+        value: item.text,
+        full: true
+      }
+
+    ],
+
+    (value) => {
+
+      if (index >= 0) {
+
+        data.ideas[index] = value;
+
+      } else {
+
+        data.ideas.push(value);
+
+      }
+
+    }
+
+  );
+
+}
+
+$("#addIdea").addEventListener(
+  "click",
+  () => ideaForm()
+);
+
+function renderIdeas() {
+
+  const element =
+    $("#ideasGrid");
+
+  if (data.ideas.length === 0) {
+
+    element.innerHTML = `
+
+      <div class="empty">
+        Nenhuma ideia adicionada.
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+  element.innerHTML =
+    data.ideas.map(
+      (idea, index) => `
+
+        <article class="card">
+
+          <span class="tag">
+            ${escapeHTML(
+              idea.category ||
+              "Ideia"
+            )}
+          </span>
+
+          <h3>
+            ${escapeHTML(
+              idea.title ||
+              "Sem título"
+            )}
+          </h3>
+
+          <p>
+            ${escapeHTML(
+              idea.text ||
+              ""
+            )}
+          </p>
+
+          <div class="actions">
+
+            <button
+              class="action-btn"
+              onclick="ideaForm(data.ideas[${index}], ${index})"
+            >
+              Editar
+            </button>
+
+            <button
+              class="action-btn delete"
+              onclick="removeItem('ideas', ${index})"
+            >
+              Excluir
+            </button>
+
+          </div>
+
+        </article>
+
+      `
+    ).join("");
+
+}
+
+/* PLAYLIST */
+
+function songForm(
+  item = {},
+  index = -1
+) {
+
+  openModal(
+
+    index >= 0
+      ? "Editar música"
+      : "Nova música",
+
+    [
+
+      {
+        name: "title",
+        label: "Nome da música",
+        placeholder: "Ex.: Nome da música",
+        value: item.title
+      },
+
+      {
+        name: "artist",
+        label: "Artista",
+        placeholder: "Ex.: Artista",
+        value: item.artist
+      },
+
+      {
+        name: "link",
+        label: "Link",
+        placeholder: "YouTube, Spotify...",
+        value: item.link,
+        full: true
+      },
+
+      {
+        name: "moment",
+        label: "Para qual momento?",
+        type: "textarea",
+        value: item.moment,
+        full: true
+      }
+
+    ],
+
+    (value) => {
+
+      if (index >= 0) {
+
+        data.playlist[index] = value;
+
+      } else {
+
+        data.playlist.push(value);
+
+      }
+
+    }
+
+  );
+
+}
+
+$("#addSong").addEventListener(
+  "click",
+  () => songForm()
+);
+
+function renderPlaylist() {
+
+  const element =
+    $("#playlistGrid");
+
+  if (data.playlist.length === 0) {
+
+    element.innerHTML = `
+
+      <div class="empty">
+        Nenhuma música adicionada.
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+  element.innerHTML =
+    data.playlist.map(
+      (song, index) => `
+
+        <article class="card">
+
+          <h3>
+            🎵 ${escapeHTML(
+              song.title ||
+              "Sem título"
+            )}
+          </h3>
+
+          <span class="tag">
+            ${escapeHTML(
+              song.artist ||
+              "Artista desconhecido"
+            )}
+          </span>
+
+          <p>
+            ${escapeHTML(
+              song.moment ||
+              "Sem descrição."
+            )}
+          </p>
+
+          ${
+            song.link
+              ? `<a
+                  href="${escapeHTML(song.link)}"
+                  target="_blank"
+                  class="primary-btn"
+                >
+                  Abrir música
+                </a>`
+              : ""
+          }
+
+          <div class="actions">
+
+            <button
+              class="action-btn"
+              onclick="songForm(data.playlist[${index}], ${index})"
+            >
+              Editar
+            </button>
+
+            <button
+              class="action-btn delete"
+              onclick="removeItem('playlist', ${index})"
+            >
+              Excluir
+            </button>
+
+          </div>
+
+        </article>
+
+      `
+    ).join("");
 
 }
 
 /* EXCLUIR */
 
-function removeItem(type, index) {
+function removeItem(
+  type,
+  index
+) {
 
   if (
-    confirm("Tem certeza que deseja excluir?")
+    confirm(
+      "Tem certeza que deseja excluir?"
+    )
   ) {
 
-    data[type].splice(index, 1);
+    data[type].splice(
+      index,
+      1
+    );
 
     save();
 
@@ -582,13 +1501,131 @@ function updateStats() {
   $("#statChapters").textContent =
     data.chapters.length;
 
-  $("#statTimeline").textContent =
-    data.timeline.length;
+  $("#statTimelines").textContent =
+    data.timelines.length;
 
   $("#statIdeas").textContent =
     data.ideas.length;
 
 }
+
+/* PALETAS */
+
+$$(".palette").forEach(
+  (button) => {
+
+    button.addEventListener(
+      "click",
+      () => {
+
+        const palette =
+          button.dataset.palette;
+
+        if (palette === "pink") {
+
+          document.documentElement.style.setProperty(
+            "--primary",
+            "#d46a91"
+          );
+
+          document.documentElement.style.setProperty(
+            "--primary-dark",
+            "#8e3f61"
+          );
+
+          document.documentElement.style.setProperty(
+            "--accent",
+            "#f2a9c0"
+          );
+
+        }
+
+        if (palette === "darkpink") {
+
+          document.documentElement.style.setProperty(
+            "--primary",
+            "#9e4266"
+          );
+
+          document.documentElement.style.setProperty(
+            "--primary-dark",
+            "#4e2438"
+          );
+
+          document.documentElement.style.setProperty(
+            "--accent",
+            "#d47b9b"
+          );
+
+        }
+
+        if (palette === "softpink") {
+
+          document.documentElement.style.setProperty(
+            "--primary",
+            "#c985a0"
+          );
+
+          document.documentElement.style.setProperty(
+            "--primary-dark",
+            "#986078"
+          );
+
+          document.documentElement.style.setProperty(
+            "--accent",
+            "#e9b7c9"
+          );
+
+        }
+
+      }
+    );
+
+  }
+);
+
+/* BOTÃO ADICIONAR */
+
+$("#quickAdd").addEventListener(
+  "click",
+  () => {
+
+    const current =
+      document.querySelector(
+        ".section.active"
+      )?.id;
+
+    if (current === "characters") {
+      characterForm();
+    }
+
+    else if (current === "timelines") {
+      timelineForm();
+    }
+
+    else if (current === "chapters") {
+      chapterForm();
+    }
+
+    else if (current === "places") {
+      placeForm();
+    }
+
+    else if (current === "ideas") {
+      ideaForm();
+    }
+
+    else if (current === "playlist") {
+      songForm();
+    }
+
+    else {
+      showSection("characters");
+      characterForm();
+    }
+
+  }
+);
 
 /* RENDERIZAÇÃO */
 
@@ -598,7 +1635,15 @@ function renderAll() {
 
   renderFamilies();
 
-  renderTimeline();
+  renderTimelines();
+
+  renderChapters();
+
+  renderPlaces();
+
+  renderIdeas();
+
+  renderPlaylist();
 
   updateStats();
 
