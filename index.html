@@ -6,11 +6,14 @@
   <title>Um Sonho Real — Painel da Escritora</title>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
   <aside class="sidebar">
+
     <div class="brand">
       <div class="brand-icon">✦</div>
+
       <div>
         <strong>Um Sonho Real</strong>
         <span>Painel da Escritora</span>
@@ -18,16 +21,17 @@
     </div>
 
     <nav>
-      <button class="nav-btn active" data-section="dashboard">⌂ <span>Início</span></button>
-      <button class="nav-btn" data-section="characters">♙ <span>Personagens</span></button>
-      <button class="nav-btn" data-section="families">♧ <span>Famílias</span></button>
-      <button class="nav-btn" data-section="timeline">◷ <span>Linha do tempo</span></button>
-      <button class="nav-btn" data-section="chapters">▤ <span>Capítulos</span></button>
-      <button class="nav-btn" data-section="places">⌖ <span>Lugares</span></button>
-      <button class="nav-btn" data-section="ideas">✎ <span>Ideias</span></button>
-      <button class="nav-btn" data-section="playlist">♫ <span>Playlist</span></button>
-      <button class="nav-btn" data-section="settings">⚙ <span>Personalização</span></button>
+      <button class="nav-btn active" data-section="dashboard">🏠 <span>Início</span></button>
+      <button class="nav-btn" data-section="characters">👥 <span>Personagens</span></button>
+      <button class="nav-btn" data-section="families">🌳 <span>Famílias</span></button>
+      <button class="nav-btn" data-section="timelines">🕰️ <span>Linhas do tempo</span></button>
+      <button class="nav-btn" data-section="chapters">📖 <span>Capítulos</span></button>
+      <button class="nav-btn" data-section="places">🗺️ <span>Lugares</span></button>
+      <button class="nav-btn" data-section="ideas">💡 <span>Ideias</span></button>
+      <button class="nav-btn" data-section="playlist">🎵 <span>Playlist</span></button>
+      <button class="nav-btn" data-section="settings">🎨 <span>Personalização</span></button>
     </nav>
+
   </aside>
 
   <main class="main">
@@ -35,25 +39,27 @@
     <header class="topbar">
       <div>
         <p class="eyebrow">MEU UNIVERSO</p>
-        <h1>Painel da Escritora</h1>
+        <h1 id="pageTitle">Painel da Escritora</h1>
       </div>
 
-      <button class="primary-btn" id="quickAdd">
-        ＋ Adicionar
-      </button>
+      <button class="primary-btn" id="quickAdd">＋ Adicionar</button>
     </header>
+
+    <!-- INÍCIO -->
 
     <section id="dashboard" class="section active">
 
       <div class="hero">
+
         <div>
           <p class="eyebrow">BEM-VINDA AO SEU UNIVERSO</p>
 
           <h2>Um Sonho Real</h2>
 
           <p class="hero-text">
-            Organize personagens, famílias, capítulos, mistérios
-            e cada detalhe da sua história em um só lugar.
+            Organize personagens, famílias, capítulos,
+            acontecimentos, mistérios e cada detalhe
+            da sua história em um só lugar.
           </p>
 
           <button class="primary-btn" data-go="characters">
@@ -62,6 +68,7 @@
         </div>
 
         <div class="hero-symbol">♔</div>
+
       </div>
 
       <div class="stats">
@@ -77,8 +84,8 @@
         </div>
 
         <div class="stat-card">
-          <span>Acontecimentos</span>
-          <strong id="statTimeline">0</strong>
+          <span>Linhas do tempo</span>
+          <strong id="statTimelines">0</strong>
         </div>
 
         <div class="stat-card">
@@ -88,7 +95,45 @@
 
       </div>
 
+      <div class="dashboard-grid">
+
+        <div class="card">
+
+          <div class="card-header">
+            <h3>Linhas do tempo</h3>
+
+            <button class="text-btn" data-go="timelines">
+              Ver tudo
+            </button>
+          </div>
+
+          <div id="dashboardTimelines" class="empty">
+            Suas linhas do tempo aparecerão aqui.
+          </div>
+
+        </div>
+
+        <div class="card">
+
+          <div class="card-header">
+            <h3>Últimas ideias</h3>
+
+            <button class="text-btn" data-go="ideas">
+              Ver tudo
+            </button>
+          </div>
+
+          <div id="dashboardIdeas" class="empty">
+            Suas ideias aparecerão aqui.
+          </div>
+
+        </div>
+
+      </div>
+
     </section>
+
+    <!-- PERSONAGENS -->
 
     <section id="characters" class="section">
 
@@ -100,7 +145,7 @@
           <h2>Personagens</h2>
 
           <p>
-            Crie fichas completas e conecte cada personagem à sua família.
+            Crie fichas completas para cada personagem.
           </p>
         </div>
 
@@ -114,6 +159,8 @@
 
     </section>
 
+    <!-- FAMÍLIAS -->
+
     <section id="families" class="section">
 
       <div class="section-intro">
@@ -124,7 +171,7 @@
           <h2>Famílias</h2>
 
           <p>
-            Visualize sobrenomes e relações familiares.
+            Veja os personagens organizados por sobrenome.
           </p>
         </div>
 
@@ -134,29 +181,33 @@
 
     </section>
 
-    <section id="timeline" class="section">
+    <!-- LINHAS DO TEMPO -->
+
+    <section id="timelines" class="section">
 
       <div class="section-intro">
 
         <div>
           <p class="eyebrow">CRONOLOGIA</p>
 
-          <h2>Linha do tempo</h2>
+          <h2>Linhas do tempo</h2>
 
           <p>
-            Organize os acontecimentos da sua história em ordem.
+            Crie várias linhas do tempo para diferentes partes da história.
           </p>
         </div>
 
         <button class="primary-btn" id="addTimeline">
-          ＋ Novo acontecimento
+          ＋ Nova linha do tempo
         </button>
 
       </div>
 
-      <div id="timelineList" class="timeline"></div>
+      <div id="timelinesGrid" class="timeline-groups"></div>
 
     </section>
+
+    <!-- CAPÍTULOS -->
 
     <section id="chapters" class="section">
 
@@ -168,7 +219,7 @@
           <h2>Capítulos</h2>
 
           <p>
-            Planeje cada capítulo da sua história.
+            Planeje cada capítulo e suas cenas.
           </p>
         </div>
 
@@ -182,6 +233,8 @@
 
     </section>
 
+    <!-- LUGARES -->
+
     <section id="places" class="section">
 
       <div class="section-intro">
@@ -192,7 +245,7 @@
           <h2>Lugares</h2>
 
           <p>
-            Guarde os lugares importantes da história.
+            Organize os locais importantes da sua história.
           </p>
         </div>
 
@@ -206,6 +259,8 @@
 
     </section>
 
+    <!-- IDEIAS -->
+
     <section id="ideas" class="section">
 
       <div class="section-intro">
@@ -216,7 +271,7 @@
           <h2>Ideias e anotações</h2>
 
           <p>
-            Não deixe nenhuma ideia se perder.
+            Guarde todas as ideias da sua história.
           </p>
         </div>
 
@@ -229,6 +284,8 @@
       <div id="ideasGrid" class="cards-grid"></div>
 
     </section>
+
+    <!-- PLAYLIST -->
 
     <section id="playlist" class="section">
 
@@ -254,19 +311,74 @@
 
     </section>
 
+    <!-- PERSONALIZAÇÃO -->
+
+    <section id="settings" class="section">
+
+      <div class="section-intro">
+
+        <div>
+          <p class="eyebrow">SEU ESTILO</p>
+
+          <h2>Personalização</h2>
+
+          <p>
+            Escolha o visual do seu painel.
+          </p>
+        </div>
+
+      </div>
+
+      <div class="settings-card card">
+
+        <h3>Paletas de cores</h3>
+
+        <div class="palette-options">
+
+          <button class="palette" data-palette="pink">
+            <span class="palette-colors">
+              <i></i>
+              <i></i>
+              <i></i>
+            </span>
+            <b>Rosa romântico</b>
+          </button>
+
+          <button class="palette" data-palette="darkpink">
+            <span class="palette-colors">
+              <i></i>
+              <i></i>
+              <i></i>
+            </span>
+            <b>Rosa mistério</b>
+          </button>
+
+          <button class="palette" data-palette="softpink">
+            <span class="palette-colors">
+              <i></i>
+              <i></i>
+              <i></i>
+            </span>
+            <b>Rosa delicado</b>
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+
   </main>
+
+  <!-- MODAL -->
 
   <div id="modal" class="modal hidden">
 
     <div class="modal-box">
 
-      <button class="close" id="closeModal">
-        ×
-      </button>
+      <button class="close" id="closeModal">×</button>
 
-      <h2 id="modalTitle">
-        Adicionar
-      </h2>
+      <h2 id="modalTitle">Adicionar</h2>
 
       <form id="modalForm"></form>
 
